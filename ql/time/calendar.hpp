@@ -4,6 +4,7 @@
  Copyright (C) 2000, 2001, 2002, 2003 RiskMap srl
  Copyright (C) 2003, 2004, 2005, 2006, 2007 StatPro Italia srl
  Copyright (C) 2006 Piter Dias
+ Copyright (C) 2017 Johan Hagenbjörk
 
  This file is part of QuantLib, a free-software/open-source library
  for financial quantitative analysts and developers - http://quantlib.org/
@@ -65,7 +66,10 @@ namespace QuantLib {
             virtual std::string name() const = 0;
             virtual bool isBusinessDay(const Date&) const = 0;
             virtual bool isWeekend(Weekday) const = 0;
+            virtual std::string holidayName(const Date&) const;
             std::set<Date> addedHolidays, removedHolidays;
+          protected:
+            virtual int holidayType(const Date&) const;
         };
         boost::shared_ptr<Impl> impl_;
       public:
@@ -102,7 +106,8 @@ namespace QuantLib {
         bool isEndOfMonth(const Date& d) const;
         //! last business day of the month to which the given date belongs
         Date endOfMonth(const Date& d) const;
-
+        //! Returns a string containing the name of the holiday.
+        std::string holidayName(const Date& d) const;
         /*! Adds a date to the set of holidays for the given calendar. */
         void addHoliday(const Date&);
         /*! Removes a date from the set of holidays for the given calendar. */
@@ -218,6 +223,11 @@ namespace QuantLib {
     inline bool Calendar::isWeekend(Weekday w) const {
         QL_REQUIRE(impl_, "no implementation provided");
         return impl_->isWeekend(w);
+    }
+
+    inline std::string Calendar::holidayName(const Date& d) const {
+        QL_REQUIRE(impl_, "no implementation provided");
+        return impl_->holidayName(d);
     }
 
     inline bool operator==(const Calendar& c1, const Calendar& c2) {

@@ -2,6 +2,7 @@
 
 /*
  Copyright (C) 2000, 2001, 2002, 2003 RiskMap srl
+ Copyright (C) 2017, Johan Hagenbjörk
 
  This file is part of QuantLib, a free-software/open-source library
  for financial quantitative analysts and developers - http://quantlib.org/
@@ -18,6 +19,7 @@
 */
 
 #include <ql/time/calendars/sweden.hpp>
+#include <ql/settings.hpp>
 
 namespace QuantLib {
 
@@ -27,44 +29,87 @@ namespace QuantLib {
         impl_ = impl;
     }
 
-    bool Sweden::Impl::isBusinessDay(const Date& date) const {
+    bool  Sweden::Impl::isBusinessDay(const Date& date) const {
+        if (isWeekend(date.weekday()))
+            return false;
+        else
+            return holidayType(date) == BusinessDay;
+    }
+
+    int Sweden::Impl::holidayType(const Date& date) const {
         Weekday w = date.weekday();
+        Date ed = Settings::instance().evaluationDate(); // This is an expensive calculation, try to avoid 
         Day d = date.dayOfMonth(), dd = date.dayOfYear();
         Month m = date.month();
         Year y = date.year();
         Day em = easterMonday(y);
-        if (isWeekend(w)
-            // Good Friday
-            || (dd == em-3)
-            // Easter Monday
-            || (dd == em)
-            // Ascension Thursday
-            || (dd == em+38)
-            // Whit Monday (till 2004)
-            || (dd == em+49 && y < 2005)
-            // New Year's Day
-            || (d == 1  && m == January)
-            // Epiphany
-            || (d == 6  && m == January)
-            // May Day
-            || (d == 1  && m == May)
-            // June 6 id National Day but is not a holiday.
-            // It has been debated wheter or not this day should be
-            // declared as a holiday.
-            // As of 2002 the Stockholmborsen is open that day
-            // || (d == 6  && m == June)
-            // Midsummer Eve (Friday between June 19-25)
-            || (w == Friday && (d >= 19 && d <= 25) && m == June)
-            // Christmas Eve
-            || (d == 24 && m == December)
-            // Christmas Day
-            || (d == 25 && m == December)
-            // Boxing Day
-            || (d == 26 && m == December)
-            // New Year's Eve
-            || (d == 31 && m == December))
-            return false;
-        return true;
+
+        if (dd == em - 3)
+            return GoodFriday;
+        else if (dd == em)
+            return EasterMonday;
+        else if (dd == em + 38)
+            return AscensionThursday;
+        else if (dd == em + 49 && y < 2005) // fixme
+            return WhitMonday;
+        else if (d == 1 && m == January)
+            return NewYearsDay;
+        else if (d == 6 && m == January)
+            return Epiphany;
+        else if (d == 1 && m == May)
+            return MayDay;
+        else if (d == 6 && m == June && y >= 2010) // fixme
+            return NationalDay;
+        else if (w == Friday && (d >= 19 && d <= 25) && m == June)
+            return MidsummerEve;
+        else if (d == 24 && m == December)
+            return ChristmasEve;
+        else if (d == 25 && m == December)
+            return ChristmasDay;
+        else if (d == 26 && m == December)
+            return BoxingDay;
+        else if (d == 31 && m == December)
+            return NewYearsEve;
+        else if (isWeekend(w))
+            return Weekend;
+        else
+            return BusinessDay;
+    }
+        
+    std::string Sweden::Impl::holidayName(const Date& date) const {
+        switch (holidayType(date)) {
+            case Weekend:
+                return "Weekend";
+            case NewYearsDay:
+                return "New Years Day";
+            case Epiphany:
+                return "Epiphany";
+            case GoodFriday:
+                return "Good Friday";
+            case EasterMonday:
+                return "Easter Monday";
+            case AscensionThursday:
+                return "Ascension Thursday";
+            case WhitMonday:
+                return "Whit Monday";
+            case MayDay:
+                return "May Day";
+            case NationalDay:
+                return "National Day";
+            case MidsummerEve:
+                return "Midsummer Eve";
+            case ChristmasEve:
+                return "Christmas Eve";
+            case ChristmasDay:
+                return "Christmas Day";
+            case BoxingDay:
+                return "Boxing Day";
+            case NewYearsEve:
+                return "New Year's Eve";
+            default:
+                return "Business Day";
+        }
+
     }
 
 }

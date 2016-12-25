@@ -2,6 +2,7 @@
 
 /*
  Copyright (C) 2000, 2001, 2002, 2003 RiskMap srl
+ Copyright (C) 2017, Johan Hagenbjörk
 
  This file is part of QuantLib, a free-software/open-source library
  for financial quantitative analysts and developers - http://quantlib.org/
@@ -54,8 +55,17 @@ namespace QuantLib {
       private:
         class Impl : public Calendar::WesternImpl {
           public:
+            enum Holidays { BusinessDay, Weekend,
+                            NewYearsDay, Epiphany, GoodFriday, 
+                            EasterMonday, AscensionThursday, WhitMonday, 
+                            MayDay, NationalDay, MidsummerEve, 
+                            ChristmasEve, ChristmasDay, BoxingDay, 
+                            NewYearsEve };
+            
             std::string name() const { return "Sweden"; }
             bool isBusinessDay(const Date&) const;
+            int holidayType(const Date&) const;
+            std::string holidayName(const Date&) const;
         };
       public:
         Sweden();

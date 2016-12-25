@@ -173,7 +173,13 @@ namespace QuantLib {
         return wd;
     }
 
+    int Calendar::Impl::holidayType(const Date&) const {
+        QL_FAIL("Calendar " << name() << " does not support this feature.");
+    }
 
+    std::string Calendar::Impl::holidayName(const Date&) const {
+        return "Not implemented for " + name();
+    }
 
    // Western calendars
 
