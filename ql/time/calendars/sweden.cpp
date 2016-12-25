@@ -38,7 +38,7 @@ namespace QuantLib {
 
     int Sweden::Impl::holidayType(const Date& date) const {
         Weekday w = date.weekday();
-        Date ed = Settings::instance().evaluationDate(); // This is an expensive calculation, try to avoid 
+        Date ed = Settings::instance().evaluationDate();
         Day d = date.dayOfMonth(), dd = date.dayOfYear();
         Month m = date.month();
         Year y = date.year();
