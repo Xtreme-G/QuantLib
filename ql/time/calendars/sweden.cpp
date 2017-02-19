@@ -44,24 +44,37 @@ namespace QuantLib {
         Year y = date.year();
         Day em = easterMonday(y);
 
-        if (dd == em - 3)
+        if (d == 1 && m == January)
+            return NewYearsDay;
+        else if (d == 6 && m == January)
+            return Epiphany;
+        else if (d == 25 && m == March &&
+                 (ed < Date(22, February, 1952) || // Removed 1952-02-22
+                  y <= 1953 && ed >= Date(22, February, 1952))) // Last 1953
+            return FeastOfAnnunciation;
+        else if (dd == em - 3)
             return GoodFriday;
         else if (dd == em)
             return EasterMonday;
         else if (dd == em + 38)
             return AscensionThursday;
-        else if (dd == em + 49 && y < 2005) // fixme
+        else if (dd == em + 49 && ed < Date(12, October, 2004)) // Removed 2004-10-12, Last 2004
             return WhitMonday;
-        else if (d == 1 && m == January)
-            return NewYearsDay;
-        else if (d == 6 && m == January)
-            return Epiphany;
-        else if (d == 1 && m == May)
+        else if (d == 1 && m == May && y >= 1939) // First 1939
             return MayDay;
-        else if (d == 6 && m == June && y >= 2010) // fixme
+        else if (d == 6 && m == June && ed >= Date(12, October, 2004)) // Introduced 2004-10-12
             return NationalDay;
-        else if (w == Friday && (d >= 19 && d <= 25) && m == June)
+        else if (w == Friday && (d >= 19 && d <= 25) && m == June && // Introduced 1952-02-22
+                 ed >= Date(22, February, 1952) && y >= 1954) // First 1954
             return MidsummerEve;
+        else if (d == 24 && m == June && 
+                 (ed < Date(22, February, 1952) || // removed 1952-02-22
+                  y <= 1953 && ed >= Date(22, February, 1952))) //last 1953
+            return MidsummerDay;
+        else if (d == 1 && m == November &&
+                 (ed < Date(22, February, 1952) || // Removed 1952-02-22
+                  y <= 1953 && ed >= Date(22, February, 1952))) // Last 1953
+            return AllSaintsDay;
         else if (d == 24 && m == December)
             return ChristmasEve;
         else if (d == 25 && m == December)
@@ -84,6 +97,8 @@ namespace QuantLib {
                 return "New Years Day";
             case Epiphany:
                 return "Epiphany";
+            case FeastOfAnnunciation:
+                return "Feast of the Annunciation";
             case GoodFriday:
                 return "Good Friday";
             case EasterMonday:
@@ -98,6 +113,10 @@ namespace QuantLib {
                 return "National Day";
             case MidsummerEve:
                 return "Midsummer Eve";
+            case MidsummerDay:
+                return "Midsummer Eve";
+            case AllSaintsDay:
+                return "All Saint's Day";
             case ChristmasEve:
                 return "Christmas Eve";
             case ChristmasDay:
@@ -109,7 +128,6 @@ namespace QuantLib {
             default:
                 return "Business Day";
         }
-
     }
 
 }
