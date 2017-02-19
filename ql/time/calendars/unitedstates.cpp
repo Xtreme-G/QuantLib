@@ -92,6 +92,47 @@ namespace QuantLib {
         }
 
     }
+
+    std::string UnitedStates::holidayName(int holidayType) {
+        switch (holidayType) {
+        case Weekend:
+            return "Weekend";
+        case NewYearsDay:
+            return "New Year's Day";
+        case MartinLutherKingDay:
+            return "Martin Luther King Day";
+        case WashingtonsBirthday:
+            return "Washington's Birthday";
+        case PresidentsDay:
+            return "President's Day";
+        case GoodFriday:
+            return "Good Friday";
+        case DecorationDay:
+            return "DecorationDay";
+        case MemorialDay:
+            return "Memorial Day";
+        case IndependenceDay:
+            return "Independence Day";
+        case LabourDay:
+            return "Labour Day";
+        case ColumbusDay:
+            return "Columbus Day";
+        case ArmisticeDay:
+            return "Armistice Day";
+        case VeteransDay:
+            return "Veterans Day";
+        case ThanksgivingDay:
+            return "Thanksgiving Day";
+        case ChristmasDay:
+            return "Christmas Day";
+        case PresidentElectionDay:
+            return "President Elections Day";
+        case SpecialClosing:
+            return "Closed markets due to a special event";
+        default:
+            return "Business Day";
+        }    
+    }
     
     UnitedStates::UnitedStates(UnitedStates::Market market) {
         // all calendar instances on the same market share the same
@@ -168,58 +209,8 @@ namespace QuantLib {
             return BusinessDay;
     }
 
-
-    bool UnitedStates::NyseImpl::isBusinessDay(const Date& date) const {
-        Weekday w = date.weekday();
-        Day d = date.dayOfMonth(), dd = date.dayOfYear();
-        Month m = date.month();
-        Year y = date.year();
-        if (isWeekend(w))
-            return false;
-        // Special closings
-        if (// Hurricane Sandy
-            (y == 2012 && m == October && (d == 29 || d == 30))
-            // President Ford's funeral
-            || (y == 2007 && m == January && d == 2)
-            // President Reagan's funeral
-            || (y == 2004 && m == June && d == 11)
-            // September 11-14, 2001
-            || (y == 2001 && m == September && (11 <= d && d <= 14))
-            // President Nixon's funeral
-            || (y == 1994 && m == April && d == 27)
-            // Hurricane Gloria
-            || (y == 1985 && m == September && d == 27)
-            // 1977 Blackout
-            || (y == 1977 && m == July && d == 14)
-            // Funeral of former President Lyndon B. Johnson.
-            || (y == 1973 && m == January && d == 25)
-            // Funeral of former President Harry S. Truman
-            || (y == 1972 && m == December && d == 28)
-            // National Day of Participation for the lunar exploration.
-            || (y == 1969 && m == July && d == 21)
-            // Funeral of former President Eisenhower.
-            || (y == 1969 && m == March && d == 31)
-            // Closed all day - heavy snow.
-            || (y == 1969 && m == February && d == 10)
-            // Day after Independence Day.
-            || (y == 1968 && m == July && d == 5)
-            // June 12-Dec. 31, 1968
-            // Four day week (closed on Wednesdays) - Paperwork Crisis
-            || (y == 1968 && dd >= 163 && w == Wednesday)
-            // Day of mourning for Martin Luther King Jr.
-            || (y == 1968 && m == April && d == 9)
-            // Funeral of President Kennedy
-            || (y == 1963 && m == November && d == 25)
-            // Day before Decoration Day
-            || (y == 1961 && m == May && d == 29)
-            // Day after Christmas
-            || (y == 1958 && m == December && d == 26)
-            // Christmas Eve
-            || ((y == 1954 || y == 1956 || y == 1965)
-            && m == December && d == 24)
-            ) return false;
-        else
-            return true;
+    std::string UnitedStates::SettlementImpl::holidayName(const Date& date) const {
+        return UnitedStates::holidayName(holidayType(date));
     }
 
     bool UnitedStates::NyseImpl::isBusinessDay(const Date& date) const {
@@ -234,7 +225,7 @@ namespace QuantLib {
         Day d = date.dayOfMonth(), dd = date.dayOfYear();
         Date ed = Settings::instance().evaluationDate();
         Month m = date.month();
-        Year y = date.year();
+        Year y = date.year(), ey = ed.year();
         Day em = easterMonday(y);
 
         if ((d == 1 || (d == 2 && w == Monday)) && m == January)
@@ -260,13 +251,59 @@ namespace QuantLib {
             return ThanksgivingDay; // fourth Thursday in November
         else if ((d == 25 || (d == 26 && w == Monday) ||
             (d == 24 && w == Friday)) && m == December)
-            return ChristmasDay;// Monday if Sunday or Friday if Saturday
+            return ChristmasDay; // Monday if Sunday or Friday if Saturday
         else if (isPresidentElectionDay(d, m, y, w, ed))
             return PresidentElectionDay;
         else if (isWeekend(w))
             return Weekend;
+        else if ( // Special Closings
+            // Hurricane Sandy
+            (ey > 2012 && y == 2012 && m == October && (d == 29 || d == 30))
+            // President Ford's funeral
+            || (ey > 2007 && y == 2007 && m == January && d == 2)
+            // President Reagan's funeral
+            || (ey > 2004 && y == 2004 && m == June && d == 11)
+            // September 11-14, 2001
+            || (ey > 2001 && y == 2001 && m == September && (11 <= d && d <= 14))
+            // President Nixon's funeral
+            || (ey > 1994 && y == 1994 && m == April && d == 27)
+            // Hurricane Gloria
+            || (ey > 1985 && y == 1985 && m == September && d == 27)
+            // 1977 Blackout
+            || (ey > 1977 && y == 1977 && m == July && d == 14)
+            // Funeral of former President Lyndon B. Johnson.
+            || (ey > 1973 && y == 1973 && m == January && d == 25)
+            // Funeral of former President Harry S. Truman
+            || (ey > 1972 && y == 1972 && m == December && d == 28)
+            // National Day of Participation for the lunar exploration.
+            || (ey > 1969 && y == 1969 && m == July && d == 21)
+            // Funeral of former President Eisenhower.
+            || (ey > 1969 && y == 1969 && m == March && d == 31)
+            // Closed all day - heavy snow.
+            || (ey > 1969 && y == 1969 && m == February && d == 10)
+            // Day after Independence Day.
+            || (ey > 1968 && y == 1968 && m == July && d == 5)
+            // June 12-Dec. 31, 1968
+            // Four day week (closed on Wednesdays) - Paperwork Crisis
+            || (ey > 1968 && y == 1968 && dd >= 163 && w == Wednesday)
+            // Day of mourning for Martin Luther King Jr.
+            || (ey > 1968 && y == 1968 && m == April && d == 9)
+            // Funeral of President Kennedy
+            || (ey > 1963 && y == 1963 && m == November && d == 25)
+            // Day before Decoration Day
+            || (ey > 1961 && y == 1961 && m == May && d == 29)
+            // Day after Christmas
+            || (ey > 1958 && y == 1958 && m == December && d == 26)
+            // Christmas Eve
+            || ((y == 1954 || y == 1956 || y == 1965)
+            && m == December && d == 24)
+            ) return SpecialClosing;
         else
             return BusinessDay;
+    }
+
+    std::string UnitedStates::NyseImpl::holidayName(const Date& date) const {
+        return UnitedStates::holidayName(holidayType(date));
     }
 
     bool UnitedStates::GovernmentBondImpl::isBusinessDay(const Date& date) const {
@@ -316,6 +353,10 @@ namespace QuantLib {
             return BusinessDay;
     }
 
+    std::string UnitedStates::GovernmentBondImpl::holidayName(const Date& date) const {
+        return UnitedStates::holidayName(holidayType(date));
+    }
+
     bool UnitedStates::NercImpl::isBusinessDay(const Date& date) const {
         if (isWeekend(date.weekday()))
             return false;
@@ -352,5 +393,8 @@ namespace QuantLib {
             return BusinessDay;
     }
 
+    std::string UnitedStates::NercImpl::holidayName(const Date& date) const {
+        return UnitedStates::holidayName(holidayType(date));
+    }
 
 }

@@ -122,14 +122,6 @@ namespace QuantLib {
               against a list of known holidays.
     */
     class UnitedStates : public Calendar {
-      public: 
-          enum Holidays {
-              BusinessDay, Weekend,
-              NewYearsDay, MartinLutherKingDay, WashingtonsBirthday, PresidentsDay,
-              GoodFriday,  DecorationDay, MemorialDay, IndependenceDay, LabourDay, 
-              ColumbusDay, ArmisticeDay, VeteransDay, ThanksgivingDay, ChristmasDay,
-              PresidentElectionDay
-          };
       private:
         class SettlementImpl : public Calendar::WesternImpl {
           public:
@@ -168,7 +160,16 @@ namespace QuantLib {
                       GovernmentBond, //!< government-bond calendar
                       NERC            //!< off-peak days for NERC
         };
+        enum Holidays {
+            BusinessDay, Weekend,
+            NewYearsDay, MartinLutherKingDay, WashingtonsBirthday, PresidentsDay,
+            GoodFriday, DecorationDay, MemorialDay, IndependenceDay, LabourDay,
+            ColumbusDay, ArmisticeDay, VeteransDay, ThanksgivingDay, ChristmasDay,
+            PresidentElectionDay, SpecialClosing
+        };
         UnitedStates(Market market = Settlement);
+      private:
+        static std::string holidayName(int holidayType);
     };
 
 }
