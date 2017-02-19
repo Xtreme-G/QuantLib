@@ -4,6 +4,7 @@
  Copyright (C) 2000, 2001, 2002, 2003 RiskMap srl
  Copyright (C) 2003, 2004, 2005, 2006 StatPro Italia srl
  Copyright (C) 2004 Ferdinando Ametrano
+ Copyright (C) 2017 Johan Hagenbjörk
 
  This file is part of QuantLib, a free-software/open-source library
  for financial quantitative analysts and developers - http://quantlib.org/
@@ -121,21 +122,35 @@ namespace QuantLib {
               against a list of known holidays.
     */
     class UnitedStates : public Calendar {
+      public: 
+          enum Holidays {
+              BusinessDay, Weekend,
+              NewYearsDay, MartinLutherKingDay, WashingtonsBirthday, PresidentsDay,
+              GoodFriday,  DecorationDay, MemorialDay, IndependenceDay, LabourDay, 
+              ColumbusDay, ArmisticeDay, VeteransDay, ThanksgivingDay, ChristmasDay,
+              PresidentElectionDay
+          };
       private:
         class SettlementImpl : public Calendar::WesternImpl {
           public:
             std::string name() const { return "US settlement"; }
             bool isBusinessDay(const Date&) const;
+            int holidayType(const Date&) const;
+            std::string holidayName(const Date&) const;
         };
         class NyseImpl : public Calendar::WesternImpl {
           public:
             std::string name() const { return "New York stock exchange"; }
             bool isBusinessDay(const Date&) const;
+            int holidayType(const Date&) const;
+            std::string holidayName(const Date&) const;
         };
         class GovernmentBondImpl : public Calendar::WesternImpl {
           public:
             std::string name() const { return "US government bond market"; }
             bool isBusinessDay(const Date&) const;
+            int holidayType(const Date&) const;
+            std::string holidayName(const Date&) const;
         };
         class NercImpl : public Calendar::WesternImpl {
           public:
@@ -143,6 +158,8 @@ namespace QuantLib {
                 return "North American Energy Reliability Council";
             }
             bool isBusinessDay(const Date&) const;
+            int holidayType(const Date&) const;
+            std::string holidayName(const Date&) const;
         };
       public:
         //! US calendars

@@ -1,6 +1,7 @@
 /* -*- mode: c++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
 
 /*
+ Copyright (C) 2017 Johan Hagenbjörk
  Copyright (C) 2004, 2005 Ferdinando Ametrano
  Copyright (C) 2000, 2001, 2002, 2003 RiskMap srl
  Copyright (C) 2003, 2004, 2005, 2006 StatPro Italia srl
@@ -21,6 +22,7 @@
 
 #include <ql/time/calendars/unitedstates.hpp>
 #include <ql/errors.hpp>
+#include <ql/settings.hpp>
 
 namespace QuantLib {
 
@@ -28,48 +30,65 @@ namespace QuantLib {
 
         // a few rules used by multiple calendars
 
-        bool isWashingtonBirthday(Day d, Month m, Year y, Weekday w) {
-            if (y >= 1971) {
-                // third Monday in February
-                return (d >= 15 && d <= 21) && w == Monday && m == February;
-            } else {
-                // February 22nd, possily adjusted
-                return (d == 22 || (d == 23 && w == Monday)
-                        || (d == 21 && w == Friday)) && m == February;
-            }
+        bool isMartinLutherKingDay(Day d, Month m, Year y, Weekday w, Date ed) {
+            // third Monday in January, introduced 1983-08-02, first 1986
+            return m == January && w == Monday && (d >= 15 && d <= 21) 
+                   && y >= 1986 && ed >= Date(2, August, 1983);
         }
 
-        bool isMemorialDay(Day d, Month m, Year y, Weekday w) {
-            if (y >= 1971) {
-                // last Monday in May
-                return d >= 25 && w == Monday && m == May;
-            } else {
-                // May 30th, possibly adjusted
-                return (d == 30 || (d == 31 && w == Monday)
-                        || (d == 29 && w == Friday)) && m == May;
-            }
+        bool isWashingtonsBirthday(Day d, Month m, Year y, Weekday w, Date ed) {
+            // third Monday in February, introduced 1971-01-01, first 1971
+            return m == February && w == Monday && d >= 15 && d <= 21
+                   && y >= 1971 && ed >= Date(1, January, 1971);
         }
 
-        bool isLaborDay(Day d, Month m, Year y, Weekday w) {
+        bool isPresidentsDay(Day d, Month m, Year y, Weekday w, Date ed) {
+            // February 22nd, possily adjusted, removed 1971-01-01, last 1970
+            return m == February && (d == 22 || (d == 23 && w == Monday)
+                                     || (d == 21 && w == Friday));
+        }
+
+        bool isMemorialDay(Day d, Month m, Year y, Weekday w, Date ed) {
+            // last Monday in May, introduced 1971-01-01, first 1971
+            return (m == May && w == Monday && d >= 25)
+                   && y >= 1971 && ed >= Date(1, January, 1971);
+        }
+
+        bool isDecorationDay(Day d, Month m, Year y, Weekday w, Date ed) {
+            // May 30th, possibly adjusted, removed 1971-01-01, last 1970
+            return m == May && (d == 30 || (d == 31 && w == Monday)
+                                || (d == 29 && w == Friday))
+                   && (y <= 1970 && ed >= Date(1, January, 1971)
+                       || ed < Date(1, January, 1971));
+        }
+
+        bool isLaborDay(Day d, Month m, Year y, Weekday w, Date ed) {
             // first Monday in September
             return d <= 7 && w == Monday && m == September;
         }
 
-        bool isColumbusDay(Day d, Month m, Year y, Weekday w) {
-            // second Monday in October
-            return (d >= 8 && d <= 14) && w == Monday && m == October
-                && y >= 1971;
+        bool isColumbusDay(Day d, Month m, Year y, Weekday w, Date ed) {
+            // second Monday in October, introduced 1971-01-01, first 1971
+            return y >= 1971 && ed >= Date(1, January, 1971)
+                   && m == October && w == Monday && (d >= 8 && d <= 14);
         }
 
-        bool isVeteransDay(Day d, Month m, Year y, Weekday w) {
-            if (y <= 1970 || y >= 1978) {
-                // November 11th, adjusted
-                return (d == 11 || (d == 12 && w == Monday) ||
-                        (d == 10 && w == Friday)) && m == November;
-            } else {
-                // fourth Monday in October
-                return (d >= 22 && d <= 28) && w == Monday && m == October;
-            }
+        bool isVeteransDay(Day d, Month m, Year y, Weekday w, Date ed) {
+            if (y >= 1975 && ed >= Date(1, January, 1975)) {
+                // November 11th, adjusted, introduced 1975, first 1975
+                return m == November && (d == 11 || (d == 12 && w == Monday)
+                                         || (d == 10 && w == Friday));
+            } else if (y >= 1971 && ed >= Date(1, January, 1971)) {
+                // fourth Monday in October, introduced 1971-01-01, first 1971
+                return m == October && w == Monday && (d >= 22 && d <= 28);
+            } else
+                return false;
+        }
+
+        
+        bool isPresidentElectionDay(Day d, Month m, Year y, Weekday w, Date ed) {
+            return ((y <= 1968 || (y <= 1980 && y % 4 == 0)) && m == November
+                    && d <= 7 && w == Tuesday);
         }
 
     }
@@ -103,40 +122,50 @@ namespace QuantLib {
         }
     }
 
-
     bool UnitedStates::SettlementImpl::isBusinessDay(const Date& date) const {
+        if (isWeekend(date.weekday()))
+            return false;
+        else
+            return holidayType(date) == BusinessDay;
+    }
+
+    int UnitedStates::SettlementImpl::holidayType(const Date& date) const {
         Weekday w = date.weekday();
+        Date ed = Settings::instance().evaluationDate();
         Day d = date.dayOfMonth();
         Month m = date.month();
         Year y = date.year();
-        if (isWeekend(w)
-            // New Year's Day (possibly moved to Monday if on Sunday)
-            || ((d == 1 || (d == 2 && w == Monday)) && m == January)
-            // (or to Friday if on Saturday)
-            || (d == 31 && w == Friday && m == December)
-            // Martin Luther King's birthday (third Monday in January)
-            || ((d >= 15 && d <= 21) && w == Monday && m == January
-                && y >= 1983)
-            // Washington's birthday (third Monday in February)
-            || isWashingtonBirthday(d, m, y, w)
-            // Memorial Day (last Monday in May)
-            || isMemorialDay(d, m, y, w)
-            // Independence Day (Monday if Sunday or Friday if Saturday)
-            || ((d == 4 || (d == 5 && w == Monday) ||
+
+        if ((d == 1 || (d == 2 && w == Monday)) && m == January)
+            return NewYearsDay; // possibly moved to Monday if on Sunday
+        else if (d == 31 && w == Friday && m == December)
+            return NewYearsDay; // possibly moved to Friday if on Saturday
+        else if (isMartinLutherKingDay(d, m, y, w, ed))
+            return MartinLutherKingDay;
+        else if (isWashingtonsBirthday(d, m, y, w, ed))
+            return WashingtonsBirthday;
+        else if (isPresidentsDay(d, m, y, w, ed))
+            return PresidentsDay;
+        else if (isMemorialDay(d, m, y, w, ed))
+            return MemorialDay;
+        else if ((d == 4 || (d == 5 && w == Monday) ||
                  (d == 3 && w == Friday)) && m == July)
-            // Labor Day (first Monday in September)
-            || isLaborDay(d, m, y, w)
-            // Columbus Day (second Monday in October)
-            || isColumbusDay(d, m, y, w)
-            // Veteran's Day (Monday if Sunday or Friday if Saturday)
-            || isVeteransDay(d, m, y, w)
-            // Thanksgiving Day (fourth Thursday in November)
-            || ((d >= 22 && d <= 28) && w == Thursday && m == November)
-            // Christmas (Monday if Sunday or Friday if Saturday)
-            || ((d == 25 || (d == 26 && w == Monday) ||
-                 (d == 24 && w == Friday)) && m == December))
-            return false;
-        return true;
+            return IndependenceDay; // Monday if Sunday or Friday if Saturday
+        else if (isLaborDay(d, m, y, w, ed))
+            return LabourDay;
+        else if (isColumbusDay(d, m, y, w, ed))
+            return ColumbusDay;
+        else if (isVeteransDay(d, m, y, w, ed))
+            return VeteransDay;
+        else if ((d >= 22 && d <= 28) && w == Thursday && m == November)
+            return ThanksgivingDay; // fourth Thursday in November
+        else if ((d == 25 || (d == 26 && w == Monday) ||
+                 (d == 24 && w == Friday)) && m == December)
+            return ChristmasDay;// Monday if Sunday or Friday if Saturday
+        else if (isWeekend(w))
+            return Weekend;
+        else
+            return BusinessDay;
     }
 
 
@@ -145,37 +174,8 @@ namespace QuantLib {
         Day d = date.dayOfMonth(), dd = date.dayOfYear();
         Month m = date.month();
         Year y = date.year();
-        Day em = easterMonday(y);
-        if (isWeekend(w)
-            // New Year's Day (possibly moved to Monday if on Sunday)
-            || ((d == 1 || (d == 2 && w == Monday)) && m == January)
-            // Washington's birthday (third Monday in February)
-            || isWashingtonBirthday(d, m, y, w)
-            // Good Friday
-            || (dd == em-3)
-            // Memorial Day (last Monday in May)
-            || isMemorialDay(d, m, y, w)
-            // Independence Day (Monday if Sunday or Friday if Saturday)
-            || ((d == 4 || (d == 5 && w == Monday) ||
-                 (d == 3 && w == Friday)) && m == July)
-            // Labor Day (first Monday in September)
-            || isLaborDay(d, m, y, w)
-            // Thanksgiving Day (fourth Thursday in November)
-            || ((d >= 22 && d <= 28) && w == Thursday && m == November)
-            // Christmas (Monday if Sunday or Friday if Saturday)
-            || ((d == 25 || (d == 26 && w == Monday) ||
-                 (d == 24 && w == Friday)) && m == December)
-            ) return false;
-
-        if (y >= 1998 && (d >= 15 && d <= 21) && w == Monday && m == January)
-            // Martin Luther King's birthday (third Monday in January)
+        if (isWeekend(w))
             return false;
-
-        if ((y <= 1968 || (y <= 1980 && y % 4 == 0)) && m == November
-            && d <= 7 && w == Tuesday)
-            // Presidential election days
-            return false;
-
         // Special closings
         if (// Hurricane Sandy
             (y == 2012 && m == October && (d == 29 || d == 30))
@@ -216,71 +216,141 @@ namespace QuantLib {
             || (y == 1958 && m == December && d == 26)
             // Christmas Eve
             || ((y == 1954 || y == 1956 || y == 1965)
-                && m == December && d == 24)
+            && m == December && d == 24)
             ) return false;
-
-        return true;
+        else
+            return true;
     }
 
+    bool UnitedStates::NyseImpl::isBusinessDay(const Date& date) const {
+        if (isWeekend(date.weekday()))
+            return false;
+        else
+            return holidayType(date) == BusinessDay;
+    }
 
-    bool UnitedStates::GovernmentBondImpl::isBusinessDay(const Date& date)
-                                                                      const {
+    int UnitedStates::NyseImpl::holidayType(const Date& date) const {
         Weekday w = date.weekday();
         Day d = date.dayOfMonth(), dd = date.dayOfYear();
+        Date ed = Settings::instance().evaluationDate();
         Month m = date.month();
         Year y = date.year();
         Day em = easterMonday(y);
-        if (isWeekend(w)
-            // New Year's Day (possibly moved to Monday if on Sunday)
-            || ((d == 1 || (d == 2 && w == Monday)) && m == January)
-            // Martin Luther King's birthday (third Monday in January)
-            || ((d >= 15 && d <= 21) && w == Monday && m == January
-                && y >= 1983)
-            // Washington's birthday (third Monday in February)
-            || isWashingtonBirthday(d, m, y, w)
-            // Good Friday
-            || (dd == em-3)
-            // Memorial Day (last Monday in May)
-            || isMemorialDay(d, m, y, w)
-            // Independence Day (Monday if Sunday or Friday if Saturday)
-            || ((d == 4 || (d == 5 && w == Monday) ||
-                 (d == 3 && w == Friday)) && m == July)
-            // Labor Day (first Monday in September)
-            || isLaborDay(d, m, y, w)
-            // Columbus Day (second Monday in October)
-            || isColumbusDay(d, m, y, w)
-            // Veteran's Day (Monday if Sunday or Friday if Saturday)
-            || isVeteransDay(d, m, y, w)
-            // Thanksgiving Day (fourth Thursday in November)
-            || ((d >= 22 && d <= 28) && w == Thursday && m == November)
-            // Christmas (Monday if Sunday or Friday if Saturday)
-            || ((d == 25 || (d == 26 && w == Monday) ||
-                 (d == 24 && w == Friday)) && m == December))
-            return false;
-        return true;
+
+        if ((d == 1 || (d == 2 && w == Monday)) && m == January)
+            return NewYearsDay; // possibly moved to Monday if on Sunday
+        else if (d == 31 && w == Friday && m == December)
+            return NewYearsDay; // possibly moved to Friday if on Saturday
+        else if (y >= 1998 && isMartinLutherKingDay(d, m, y, w, ed))
+            return MartinLutherKingDay;
+        else if (isWashingtonsBirthday(d, m, y, w, ed))
+            return WashingtonsBirthday;
+        else if (isPresidentsDay(d, m, y, w, ed))
+            return PresidentsDay;
+        else if (dd == em - 3)
+            return GoodFriday;
+        else if (isMemorialDay(d, m, y, w, ed))
+            return MemorialDay;
+        else if ((d == 4 || (d == 5 && w == Monday) ||
+            (d == 3 && w == Friday)) && m == July)
+            return IndependenceDay; // Monday if Sunday or Friday if Saturday
+        else if (isLaborDay(d, m, y, w, ed))
+            return LabourDay;
+        else if ((d >= 22 && d <= 28) && w == Thursday && m == November)
+            return ThanksgivingDay; // fourth Thursday in November
+        else if ((d == 25 || (d == 26 && w == Monday) ||
+            (d == 24 && w == Friday)) && m == December)
+            return ChristmasDay;// Monday if Sunday or Friday if Saturday
+        else if (isPresidentElectionDay(d, m, y, w, ed))
+            return PresidentElectionDay;
+        else if (isWeekend(w))
+            return Weekend;
+        else
+            return BusinessDay;
     }
 
+    bool UnitedStates::GovernmentBondImpl::isBusinessDay(const Date& date) const {
+        if (isWeekend(date.weekday()))
+            return false;
+        else
+            return holidayType(date) == BusinessDay;
+    }
 
-    bool UnitedStates::NercImpl::isBusinessDay(const Date& date) const {
+    int UnitedStates::GovernmentBondImpl::holidayType(const Date& date) const {
         Weekday w = date.weekday();
-        Day d = date.dayOfMonth();
+        Day d = date.dayOfMonth(), dd = date.dayOfYear();
+        Date ed = Settings::instance().evaluationDate();
         Month m = date.month();
         Year y = date.year();
-        if (isWeekend(w)
-            // New Year's Day (possibly moved to Monday if on Sunday)
-            || ((d == 1 || (d == 2 && w == Monday)) && m == January)
-            // Memorial Day (last Monday in May)
-            || isMemorialDay(d, m, y, w)
-            // Independence Day (Monday if Sunday)
-            || ((d == 4 || (d == 5 && w == Monday)) && m == July)
-            // Labor Day (first Monday in September)
-            || isLaborDay(d, m, y, w)
-            // Thanksgiving Day (fourth Thursday in November)
-            || ((d >= 22 && d <= 28) && w == Thursday && m == November)
-            // Christmas (Monday if Sunday)
-            || ((d == 25 || (d == 26 && w == Monday)) && m == December))
-            return false;
-        return true;
+        Day em = easterMonday(y);
+
+        if ((d == 1 || (d == 2 && w == Monday)) && m == January)
+            return NewYearsDay; // possibly moved to Monday if on Sunday
+        else if (d == 31 && w == Friday && m == December)
+            return NewYearsDay; // possibly moved to Friday if on Saturday
+        else if (isMartinLutherKingDay(d, m, y, w, ed))
+            return MartinLutherKingDay;
+        else if (isWashingtonsBirthday(d, m, y, w, ed))
+            return WashingtonsBirthday;
+        else if (isPresidentsDay(d, m, y, w, ed))
+            return PresidentsDay;
+        else if (dd == em - 3)
+            return GoodFriday;
+        else if (isMemorialDay(d, m, y, w, ed))
+            return MemorialDay;
+        else if ((d == 4 || (d == 5 && w == Monday) ||
+            (d == 3 && w == Friday)) && m == July)
+            return IndependenceDay; // Monday if Sunday or Friday if Saturday
+        else if (isLaborDay(d, m, y, w, ed))
+            return LabourDay;
+        else if (isColumbusDay(d, m, y, w, ed))
+            return ColumbusDay;
+        else if ((d >= 22 && d <= 28) && w == Thursday && m == November)
+            return ThanksgivingDay; // fourth Thursday in November
+        else if ((d == 25 || (d == 26 && w == Monday) ||
+            (d == 24 && w == Friday)) && m == December)
+            return ChristmasDay;// Monday if Sunday or Friday if Saturday
+        else if (isWeekend(w))
+            return Weekend;
+        else
+            return BusinessDay;
     }
+
+    bool UnitedStates::NercImpl::isBusinessDay(const Date& date) const {
+        if (isWeekend(date.weekday()))
+            return false;
+        else
+            return holidayType(date) == BusinessDay;
+    }
+
+    int UnitedStates::NercImpl::holidayType(const Date& date) const {
+        Weekday w = date.weekday();
+        Day d = date.dayOfMonth();
+        Date ed = Settings::instance().evaluationDate();
+        Month m = date.month();
+        Year y = date.year();
+
+        if ((d == 1 || (d == 2 && w == Monday)) && m == January)
+            return NewYearsDay; // possibly moved to Monday if on Sunday
+        else if (d == 31 && w == Friday && m == December)
+            return NewYearsDay; // possibly moved to Friday if on Saturday
+        else if (isMemorialDay(d, m, y, w, ed))
+            return MemorialDay;
+        else if ((d == 4 || (d == 5 && w == Monday) ||
+            (d == 3 && w == Friday)) && m == July)
+            return IndependenceDay; // Monday if Sunday or Friday if Saturday
+        else if (isLaborDay(d, m, y, w, ed))
+            return LabourDay;
+        else if ((d >= 22 && d <= 28) && w == Thursday && m == November)
+            return ThanksgivingDay; // fourth Thursday in November
+        else if ((d == 25 || (d == 26 && w == Monday) ||
+            (d == 24 && w == Friday)) && m == December)
+            return ChristmasDay;// Monday if Sunday or Friday if Saturday
+        else if (isWeekend(w))
+            return Weekend;
+        else
+            return BusinessDay;
+    }
+
 
 }
