@@ -18,6 +18,7 @@
 */
 
 #include <ql/time/calendars/denmark.hpp>
+#include <ql/settings.hpp>
 
 namespace QuantLib {
 
@@ -27,35 +28,86 @@ namespace QuantLib {
         impl_ = impl;
     }
 
-    bool Denmark::Impl::isBusinessDay(const Date& date) const {
+    bool  Denmark::Impl::isBusinessDay(const Date& date) const {
+        if (isWeekend(date.weekday()))
+            return false;
+        else
+            return holidayType(date) == BusinessDay;
+    }
+
+    int Denmark::Impl::holidayType(const Date& date) const {
         Weekday w = date.weekday();
+        Date ed = Settings::instance().evaluationDate();
         Day d = date.dayOfMonth(), dd = date.dayOfYear();
         Month m = date.month();
         Year y = date.year();
         Day em = easterMonday(y);
-        if (isWeekend(w)
-            // Maunday Thursday
-            || (dd == em-4)
-            // Good Friday
-            || (dd == em-3)
-            // Easter Monday
-            || (dd == em)
-            // General Prayer Day
-            || (dd == em+25)
-            // Ascension
-            || (dd == em+38)
-            // Whit Monday
-            || (dd == em+49)
-            // New Year's Day
-            || (d == 1  && m == January)
-            // Constitution Day, June 5th
-            || (d == 5  && m == June)
-            // Christmas
-            || (d == 25 && m == December)
-            // Boxing Day
-            || (d == 26 && m == December))
-            return false;
-        return true;
+
+        if (d == 1 && m == January)
+            return NewYearsDay;
+        else if (dd == em - 4)
+            return MaundayThrusday;
+        else if (dd == em - 3)
+            return GoodFriday;
+        else if (dd == em)
+            return EasterMonday;
+        else if (dd == em + 25)
+            return GreatPrayerDay;
+        else if (dd == em + 38)
+            return AscensionDay;
+        else if (dd == em + 39 && y >= 2008 && ed.year() >= 2008) // Introduced 2008
+            return BankHoliday;
+        else if (dd == em + 49 && ed < Date(12, October, 2004)) // Removed 2004-10-12, Last 2004
+            return WhitMonday;
+        else if (d == 5 && m == June)
+            return ConstitutionDay;
+        else if (d == 24 && m == December)
+            return ChristmasEve;
+        else if (d == 25 && m == December)
+            return ChristmasDay;
+        else if (d == 26 && m == December)
+            return BoxingDay;
+        else if (d == 31 && m == December)
+            return NewYearsEve;
+        else if (isWeekend(w))
+            return Weekend;
+        else
+            return BusinessDay;
+    }
+
+    std::string Denmark::Impl::holidayName(const Date& date) const {
+        switch (holidayType(date)) {
+        case Weekend:
+            return "Weekend";
+        case NewYearsDay:
+            return "New Years Day";
+        case MaundayThrusday:
+            return "Maunday Thursday";
+        case GoodFriday:
+            return "GoodFriday";
+        case EasterMonday:
+            return "Easter Monday";
+        case GreatPrayerDay:
+            return "Great Prayer Day";
+        case AscensionDay:
+            return "Scension Day";
+        case BankHoliday:
+            return "Bank Holiday";
+        case WhitMonday:
+            return "Whit Monday";
+        case ConstitutionDay:
+            return "Constitution Day";
+        case ChristmasEve:
+            return "Christmas Eve";
+        case ChristmasDay:
+            return "Christmas Day";
+        case BoxingDay:
+            return "Boxing Day";
+        case NewYearsEve:
+            return "New Year's Eve";
+        default:
+            return "Business Day";
+        }
     }
 
 }
