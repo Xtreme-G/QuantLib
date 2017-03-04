@@ -9,6 +9,7 @@
 #include <ql/time/calendars/china.hpp>
 #include <ql/time/calendars/czechrepublic.hpp>
 #include <ql/time/calendars/denmark.hpp>
+#include <ql/time/calendars/european.hpp>
 #include <ql/time/calendars/finland.hpp>
 #include <ql/time/calendars/germany.hpp>
 #include <ql/time/calendars/hongkong.hpp>

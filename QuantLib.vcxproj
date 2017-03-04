@@ -137,36 +137,36 @@
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">QuantLib-$(qlCompilerTag)-x64-mt</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\Quantlib\boost_1_59_0;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Quantlib\boost_1_59_0\stage\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>G:\Quantlib\boost_1_59_0;$(IncludePath)</IncludePath>
+    <LibraryPath>G:\Quantlib\boost_1_59_0\stage\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>C:\Quantlib\boost_1_59_0;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Quantlib\boost_1_59_0\stage\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>G:\Quantlib\boost_1_59_0;$(IncludePath)</IncludePath>
+    <LibraryPath>G:\Quantlib\boost_1_59_0\stage\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release (static runtime)|Win32'">
-    <IncludePath>C:\Quantlib\boost_1_59_0;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Quantlib\boost_1_59_0\stage\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>G:\Quantlib\boost_1_59_0;$(IncludePath)</IncludePath>
+    <LibraryPath>G:\Quantlib\boost_1_59_0\stage\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug (static runtime)|Win32'">
-    <IncludePath>C:\Quantlib\boost_1_59_0;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Quantlib\boost_1_59_0\stage\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>G:\Quantlib\boost_1_59_0;$(IncludePath)</IncludePath>
+    <LibraryPath>G:\Quantlib\boost_1_59_0\stage\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Quantlib\boost_1_59_0;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Quantlib\boost_1_59_0\stage\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>G:\Quantlib\boost_1_59_0;$(IncludePath)</IncludePath>
+    <LibraryPath>G:\Quantlib\boost_1_59_0\stage\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\Quantlib\boost_1_59_0;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Quantlib\boost_1_59_0\stage\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>G:\Quantlib\boost_1_59_0;$(IncludePath)</IncludePath>
+    <LibraryPath>G:\Quantlib\boost_1_59_0\stage\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release (static runtime)|x64'">
-    <IncludePath>C:\Quantlib\boost_1_59_0;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Quantlib\boost_1_59_0\stage\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>G:\Quantlib\boost_1_59_0;$(IncludePath)</IncludePath>
+    <LibraryPath>G:\Quantlib\boost_1_59_0\stage\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug (static runtime)|x64'">
-    <IncludePath>C:\Quantlib\boost_1_59_0;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Quantlib\boost_1_59_0\stage\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>G:\Quantlib\boost_1_59_0;$(IncludePath)</IncludePath>
+    <LibraryPath>G:\Quantlib\boost_1_59_0\stage\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -1271,6 +1271,7 @@
     <ClInclude Include="ql\termstructures\credit\probabilitytraits.hpp" />
     <ClInclude Include="ql\termstructures\credit\survivalprobabilitystructure.hpp" />
     <ClInclude Include="ql\time\asx.hpp" />
+    <ClInclude Include="ql\time\calendars\european.hpp" />
     <ClInclude Include="ql\utilities\all.hpp" />
     <ClInclude Include="ql\utilities\clone.hpp" />
     <ClInclude Include="ql\utilities\dataformatters.hpp" />
@@ -2295,6 +2296,7 @@
     <ClCompile Include="ql\termstructures\credit\hazardratestructure.cpp" />
     <ClCompile Include="ql\termstructures\credit\survivalprobabilitystructure.cpp" />
     <ClCompile Include="ql\time\asx.cpp" />
+    <ClCompile Include="ql\time\calendars\european.cpp" />
     <ClCompile Include="ql\utilities\dataformatters.cpp" />
     <ClCompile Include="ql\utilities\dataparsers.cpp" />
     <ClCompile Include="ql\utilities\tracing.cpp" />

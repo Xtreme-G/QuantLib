@@ -12,6 +12,7 @@ this_include_HEADERS = \
 	china.hpp \
 	czechrepublic.hpp \
 	denmark.hpp \
+    european.hpp \
 	finland.hpp \
 	germany.hpp \
 	hongkong.hpp \
@@ -54,6 +55,7 @@ libCalendars_la_SOURCES = \
 	china.cpp \
 	czechrepublic.cpp \
 	denmark.cpp \
+    european.cpp \
 	finland.cpp \
 	germany.cpp \
 	hongkong.cpp \
