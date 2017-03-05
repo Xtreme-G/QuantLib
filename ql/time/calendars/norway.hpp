@@ -2,6 +2,7 @@
 
 /*
  Copyright (C) 2000, 2001, 2002, 2003 RiskMap srl
+ Copyright (C) 2017 Johan Hagenbjörk
 
  This file is part of QuantLib, a free-software/open-source library
  for financial quantitative analysts and developers - http://quantlib.org/
@@ -33,15 +34,15 @@ namespace QuantLib {
         <ul>
         <li>Saturdays</li>
         <li>Sundays</li>
-        <li>Holy Thursday</li>
+        <li>Maundy Thursday</li>
         <li>Good Friday</li>
         <li>Easter Monday</li>
         <li>Ascension</li>
         <li>Whit(Pentecost) Monday </li>
         <li>New Year's Day, January 1st</li>
-        <li>May Day, May 1st</li>
+        <li>Labour Day, May 1st</li>
         <li>National Independence Day, May 17st</li>
-        <li>Christmas, December 25th</li>
+        <li>Christmas Day, December 25th</li>
         <li>Boxing Day, December 26th</li>
         </ul>
 
@@ -51,8 +52,15 @@ namespace QuantLib {
       private:
         class Impl : public Calendar::WesternImpl {
           public:
+            enum Holidays { BusinessDay, Weekend,
+                            NewYearsDay, MaundyThursday, GoodFriday, EasterMonday, 
+                            AscensionThursday, WhitMonday, LabourDay, NationalDay,
+                            ChristmasDay, BoxingDay };
+            
             std::string name() const { return "Norway"; }
             bool isBusinessDay(const Date&) const;
+            int holidayType(const Date&) const;
+            std::string holidayName(const Date&) const;
         };
       public:
         Norway();

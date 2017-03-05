@@ -2,6 +2,7 @@
 
 /*
  Copyright (C) 2000, 2001, 2002, 2003 RiskMap srl
+ Copyright (C) 2017 Johan Hagenbjörk
 
  This file is part of QuantLib, a free-software/open-source library
  for financial quantitative analysts and developers - http://quantlib.org/
@@ -18,6 +19,7 @@
 */
 
 #include <ql/time/calendars/norway.hpp>
+#include <ql/settings.hpp>
 
 namespace QuantLib {
 
@@ -27,35 +29,77 @@ namespace QuantLib {
         impl_ = impl;
     }
 
-    bool Norway::Impl::isBusinessDay(const Date& date) const {
+    bool  Norway::Impl::isBusinessDay(const Date& date) const {
+        if (isWeekend(date.weekday()))
+            return false;
+        else
+            return holidayType(date) == BusinessDay;
+    }
+
+
+    int Norway::Impl::holidayType(const Date& date) const {
         Weekday w = date.weekday();
+        Date ed = Settings::instance().evaluationDate();
         Day d = date.dayOfMonth(), dd = date.dayOfYear();
         Month m = date.month();
         Year y = date.year();
         Day em = easterMonday(y);
-        if (isWeekend(w)
-            // Holy Thursday
-            || (dd == em-4)
-            // Good Friday
-            || (dd == em-3)
-            // Easter Monday
-            || (dd == em)
-            // Ascension Thursday
-            || (dd == em+38)
-            // Whit Monday
-            || (dd == em+49)
-            // New Year's Day
-            || (d == 1  && m == January)
-            // May Day
-            || (d == 1  && m == May)
-            // National Independence Day
-            || (d == 17  && m == May)
-            // Christmas
-            || (d == 25 && m == December)
-            // Boxing Day
-            || (d == 26 && m == December))
-            return false;
-        return true;
+
+        if (d == 1 && m == January)
+            return NewYearsDay;
+        else if (dd == em - 4)
+            return MaundyThursday;
+        else if (dd == em - 3)
+            return GoodFriday;
+        else if (dd == em)
+            return EasterMonday;
+        else if (dd == em + 38)
+            return AscensionThursday;
+        else if (dd == em + 49)
+            return WhitMonday;
+        else if (d == 1 && m == May && // Introduced 1947-04-26
+                 ed >= Date(26, April, 1947) && y >= 1947) // First 1947
+            return LabourDay;
+        else if (d == 17 && m == May && // Introduced 1947-04-26
+                 ed >= Date(26, April, 1947) && y >= 1947) // First 1947
+            return NationalDay;
+        else if (d == 25 && m == December)
+            return ChristmasDay;
+        else if (d == 26 && m == December)
+            return BoxingDay;
+        else if (isWeekend(w))
+            return Weekend;
+        else
+            return BusinessDay;
+    }
+
+    std::string Norway::Impl::holidayName(const Date& date) const {
+        switch (holidayType(date)) {
+        case Weekend:
+            return "Weekend";
+        case NewYearsDay:
+            return "New Years Day";
+        case MaundyThursday:
+            return "Maundy Thursday";
+        case GoodFriday:
+            return "Good Friday";
+        case EasterMonday:
+            return "Easter Monday";
+        case AscensionThursday:
+            return "Ascension Thursday";
+        case WhitMonday:
+            return "Whit Monday";
+        case LabourDay:
+            return "Labour Day";
+        case NationalDay:
+            return "National Day";
+        case ChristmasDay:
+            return "Christmas Day";
+        case BoxingDay:
+            return "Boxing Day";
+        default:
+            return "Business Day";
+        }
     }
 
 }

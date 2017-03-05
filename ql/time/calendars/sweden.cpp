@@ -114,7 +114,7 @@ namespace QuantLib {
             case MidsummerEve:
                 return "Midsummer Eve";
             case MidsummerDay:
-                return "Midsummer Eve";
+                return "Midsummer Day";
             case AllSaintsDay:
                 return "All Saint's Day";
             case ChristmasEve:
