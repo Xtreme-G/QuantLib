@@ -149,6 +149,15 @@ namespace QuantLib {
                       Eurex,                  //!< Eurex
                       Euwax                   //!< Euwax
         };
+
+        enum Holidays {
+            BusinessDay, Weekend,
+            NewYearsDay, GoodFriday, EasterMonday,
+            GreatPrayerDay, AscensionDay, BankHoliday, WhitMonday,
+            ConstitutionDay, ChristmasEve, ChristmasDay, BoxingDay,
+            NewYearsEve
+        };
+
         Germany(Market market = FrankfurtStockExchange);
     };
 

@@ -56,10 +56,10 @@ namespace QuantLib {
         class Impl : public Calendar::WesternImpl {
           public:
            enum Holidays { BusinessDay, Weekend,
-                            NewYearsDay, MaundayThrusday, GoodFriday, EasterMonday, 
-                            GreatPrayerDay, AscensionDay, BankHoliday, WhitMonday, 
-                            ConstitutionDay, ChristmasEve, ChristmasDay, BoxingDay, 
-                            NewYearsEve };
+                           NewYearsDay, MaundayThrusday, GoodFriday, EasterMonday, 
+                           GreatPrayerDay, AscensionDay, BankHoliday, WhitMonday, 
+                           ConstitutionDay, ChristmasEve, ChristmasDay, BoxingDay, 
+                           NewYearsEve };
             std::string name() const { return "Denmark"; }
             bool isBusinessDay(const Date&) const;
             int holidayType(const Date&) const;
