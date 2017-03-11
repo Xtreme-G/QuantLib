@@ -2,6 +2,7 @@
 
 /*
  Copyright (C) 2004 Ferdinando Ametrano
+ Copyright (C) 2017 Johan Hagenbjörk
 
  This file is part of QuantLib, a free-software/open-source library
  for financial quantitative analysts and developers - http://quantlib.org/
@@ -119,26 +120,36 @@ namespace QuantLib {
           public:
             std::string name() const { return "German settlement"; }
             bool isBusinessDay(const Date&) const;
+            int holidayType(const Date&) const;
+            std::string holidayName(const Date&) const;
         };
         class FrankfurtStockExchangeImpl : public Calendar::WesternImpl {
           public:
             std::string name() const { return "Frankfurt stock exchange"; }
             bool isBusinessDay(const Date&) const;
+            int holidayType(const Date&) const;
+            std::string holidayName(const Date&) const;
         };
         class XetraImpl : public Calendar::WesternImpl {
           public:
             std::string name() const { return "Xetra"; }
             bool isBusinessDay(const Date&) const;
+            int holidayType(const Date&) const;
+            std::string holidayName(const Date&) const;
         };
         class EurexImpl : public Calendar::WesternImpl {
           public:
             std::string name() const { return "Eurex"; }
             bool isBusinessDay(const Date&) const;
+            int holidayType(const Date&) const;
+            std::string holidayName(const Date&) const;
         };
         class EuwaxImpl : public Calendar::WesternImpl {
         public:
             std::string name() const { return "Euwax"; }
             bool isBusinessDay(const Date&) const;
+            int holidayType(const Date&) const;
+            std::string holidayName(const Date&) const;
         };
 
       public:
@@ -152,13 +163,14 @@ namespace QuantLib {
 
         enum Holidays {
             BusinessDay, Weekend,
-            NewYearsDay, GoodFriday, EasterMonday,
-            GreatPrayerDay, AscensionDay, BankHoliday, WhitMonday,
-            ConstitutionDay, ChristmasEve, ChristmasDay, BoxingDay,
-            NewYearsEve
+            NewYearsDay, GoodFriday, EasterMonday, AscensionThursday,
+            WhitMonday, CorpusChristi, LabourDay, ReunionDay, NationalDay,
+            ChristmasEve, ChristmasDay, BoxingDay, NewYearsEve        
         };
 
         Germany(Market market = FrankfurtStockExchange);
+      private:
+        static std::string holidayName(int holidayType);
     };
 
 }

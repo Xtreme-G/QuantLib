@@ -84,13 +84,13 @@ namespace QuantLib {
         case MaundayThrusday:
             return "Maunday Thursday";
         case GoodFriday:
-            return "GoodFriday";
+            return "Good Friday";
         case EasterMonday:
             return "Easter Monday";
         case GreatPrayerDay:
             return "Great Prayer Day";
         case AscensionDay:
-            return "Scension Day";
+            return "Ascension Day";
         case BankHoliday:
             return "Bank Holiday";
         case WhitMonday:
