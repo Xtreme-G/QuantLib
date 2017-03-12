@@ -160,14 +160,12 @@ namespace QuantLib {
                       Eurex,                  //!< Eurex
                       Euwax                   //!< Euwax
         };
-
         enum Holidays {
             BusinessDay, Weekend,
             NewYearsDay, GoodFriday, EasterMonday, AscensionThursday,
             WhitMonday, CorpusChristi, LabourDay, ReunionDay, NationalDay,
             ChristmasEve, ChristmasDay, BoxingDay, NewYearsEve        
         };
-
         Germany(Market market = FrankfurtStockExchange);
       private:
         static std::string holidayName(int holidayType);

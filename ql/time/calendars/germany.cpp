@@ -82,6 +82,39 @@ namespace QuantLib {
         }
     }
 
+    std::string Germany::holidayName(int holidayType) {
+        switch (holidayType) {
+        case Weekend:
+            return "Weekend";
+        case NewYearsDay:
+            return "New Years Day";
+        case GoodFriday:
+            return "GoodFriday";
+        case EasterMonday:
+            return "Easter Monday";
+        case AscensionThursday:
+            return "Ascension Thursday";
+        case WhitMonday:
+            return "Whit Monday";
+        case CorpusChristi:
+            return "Corpus Christi";
+        case ReunionDay:
+            return "Day of German unity";
+        case NationalDay:
+            return "Old National Day";
+        case ChristmasEve:
+            return "Christmas Eve";
+        case ChristmasDay:
+            return "Christmas Day";
+        case BoxingDay:
+            return "Boxing Day";
+        case NewYearsEve:
+            return "New Year's Eve";
+        default:
+            return "Business Day";
+        }
+    }
+
     int Germany::SettlementImpl::holidayType(const Date& date) const {
         Weekday w = date.weekday();
         Date ed = Settings::instance().evaluationDate();
@@ -305,39 +338,6 @@ namespace QuantLib {
 
     std::string Germany::EuwaxImpl::holidayName(const Date& date) const {
         return Germany::holidayName(holidayType(date));
-    }
-
-    std::string Germany::holidayName(int holidayType) {
-        switch (holidayType) {
-        case Weekend:
-            return "Weekend";
-        case NewYearsDay:
-            return "New Years Day";
-        case GoodFriday:
-            return "GoodFriday";
-        case EasterMonday:
-            return "Easter Monday";
-        case AscensionThursday:
-            return "Ascension Thursday";
-        case WhitMonday:
-            return "Whit Monday";
-        case CorpusChristi:
-            return "Corpus Christi";
-        case ReunionDay:
-            return "Day of German unity";
-        case NationalDay:
-            return "Old National Day";
-        case ChristmasEve:
-            return "Christmas Eve";
-        case ChristmasDay:
-            return "Christmas Day";
-        case BoxingDay:
-            return "Boxing Day";
-        case NewYearsEve:
-            return "New Year's Eve";
-        default:
-            return "Business Day";
-        }
     }
 
 }

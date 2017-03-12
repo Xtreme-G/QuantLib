@@ -91,16 +91,22 @@ namespace QuantLib {
           public:
             std::string name() const { return "UK settlement"; }
             bool isBusinessDay(const Date&) const;
+            int holidayType(const Date&) const;
+            std::string holidayName(const Date&) const;
         };
         class ExchangeImpl : public Calendar::WesternImpl {
           public:
             std::string name() const { return "London stock exchange"; }
             bool isBusinessDay(const Date&) const;
+            int holidayType(const Date&) const;
+            std::string holidayName(const Date&) const;
         };
         class MetalsImpl : public Calendar::WesternImpl {
           public:
             std::string name() const { return "London metals exchange"; }
             bool isBusinessDay(const Date&) const;
+            int holidayType(const Date&) const;
+            std::string holidayName(const Date&) const;
         };
       public:
         //! UK calendars
@@ -108,7 +114,15 @@ namespace QuantLib {
                       Exchange,       //!< London stock-exchange calendar
                       Metals          //|< London metals-exchange calendar
         };
+        enum Holidays {
+            BusinessDay, Weekend,
+            NewYearsDay, GoodFriday, EasterMonday, WhitMonday,
+            EarlyMayBankHoliday, SpringBankHoliday, SummerBankHoliday,
+            ChristmasDay, BoxingDay, SpecialHoliday
+        };
         UnitedKingdom(Market market = Settlement);
+      private:
+        static std::string holidayName(int holidayType);
     };
 
 }
